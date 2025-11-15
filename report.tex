@@ -1,0 +1,156 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\setlength{\parskip}{0.75em}
+\setlength{\parindent}{0pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Azure Generative AI Engineer Nanodegree}
+\rhead{Project 3 Report}
+\cfoot{\thepage}
+
+\titleformat{\section}{\large\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+
+\begin{document}
+
+\begin{center}
+    {\LARGE \textbf{Project 3 Report}}\\[0.5em]
+    {\large Azure Generative AI Engineer Nanodegree (Udacity)}\\[0.5em]
+    {\large Author: Rodolfo Lerma}\\[0.5em]
+    {\large Date: November 15, 2025}
+\end{center}
+
+\vspace{1em}
+
+\section{Executive Summary}
+This document captures the full end-to-end run of the Customer Complaint Classification pipeline executed on November 15, 2025 using the provided \texttt{Coffee.m4a} audio clip. The workflow leverages Azure OpenAI Whisper for transcription, GPT-4o for multimodal reasoning, and a dedicated DALL-E 3 deployment hosted on the \texttt{incperf-openai} resource in \texttt{eastus}. All intermediate artifacts referenced below live in the \texttt{output/} directory of the repository.
+
+\section{Workflow Overview}
+The pipeline orchestrated by \texttt{main.py} performed the following major steps:
+\begin{enumerate}[label=\textbf{Step~\arabic*:}, leftmargin=*]
+    \item \textbf{Transcription} --- Whisper converted the spoken complaint into plain text.
+    \item \textbf{Prompt Engineering} --- The transcript was transformed into a detailed prompt for image generation.
+    \item \textbf{Image Generation} --- DALL-E 3 produced a synthetic depiction of the reported issue via the \texttt{incperf-openai} endpoint.
+    \item \textbf{Vision Analysis} --- GPT-4o Vision described the generated image and highlighted the malfunction.
+    \item \textbf{Annotation} --- The critical region was emphasized on top of the generated asset.
+    \item \textbf{Classification} --- GPT-4o categorized the complaint into the rubric-approved taxonomy.
+\end{enumerate}
+
+\section{Output Artifacts}
+Table~\ref{tab:artifacts} enumerates every file created during this run.
+
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.15}
+    \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{0.33\textwidth}|>{\raggedright\arraybackslash}X|}
+        \hline
+        	extbf{File} & \textbf{Description}\\
+        \hline
+        output/transcription.txt & Whisper transcript of Coffee.m4a.\\
+        output/image\_prompt.txt & Prompt issued to DALL-E 3.\\
+        output/generated\_image.png & Raw DALL-E render of the malfunctioning coffee maker.\\
+        output/annotated\_image.png & Vision model annotation highlighting the spill zone.\\
+        output/image\_description.txt & GPT-4o Vision narrative of the generated image.\\
+        output/classification.txt & Human-readable category assignment.\\
+        output/classification.json & Structured classification payload.\\
+        output/workflow\_summary.json & Aggregated record of all intermediate results.\\
+        \hline
+    \end{tabularx}
+    \caption{Artifacts produced by the Coffee.m4a run.}
+    \label{tab:artifacts}
+\end{table}
+
+\section{Detailed Results}
+\subsection{Transcription}
+\begin{quote}
+The coffee maker is leaking water from the bottom.
+\end{quote}
+
+\subsection{Image Generation Prompt}
+\begin{quote}
+A realistic photo showing: The coffee maker is leaking water from the bottom.. Focus on showing the product and the specific issue or problem mentioned. Make it clear and detailed.
+\end{quote}
+
+\subsection{Vision Description}
+\begin{quote}
+The image depicts a modern coffee maker with a glass carafe, positioned on a kitchen countertop with a tiled backsplash in the background. The coffee maker appears to be actively brewing or has recently brewed coffee. However, there is a visible issue: liquid coffee is overflowing from the carafe and trickling down onto the base of the machine, spreading across the countertop.
+
+\textbf{Visible Problems and Defects:}
+\begin{enumerate}[label=\alph*)]
+    \item Overflowing Coffee --- The carafe is clearly overfilled, leading to coffee spilling out.
+    \item Accumulation and Spillage --- The spilled coffee has pooled onto the countertop, suggesting leaks.
+    \item Moisture on the Carafe --- Condensation hints at steam escaping because of improper sealing.
+\end{enumerate}
+
+\textbf{Potential Causes:}
+\begin{itemize}
+    \item Broken or malfunctioning drip-stop mechanism.
+    \item Incorrectly positioned carafe or user error.
+    \item Damaged or cracked carafe.
+\end{itemize}
+
+\textbf{Suggestions:}
+\begin{itemize}
+    \item Inspect and service the stop-brew mechanism and seals.
+    \item Realign the carafe and respect fill limits.
+    \item Clean spills promptly and re-test the appliance.
+\end{itemize}
+\end{quote}
+
+\subsection{Classification}
+\begin{quote}
+Category: Home \& Kitchen\\
+Subcategory: Appliances\\
+Reasoning: The complaint involves a coffee maker, which is a kitchen appliance. The issue described pertains to malfunctioning due to leaking water and overflowing coffee, making ``Appliances'' the most appropriate subcategory within ``Home \& Kitchen.''
+\end{quote}
+
+\section{Visual Evidence}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{output/generated_image.png}
+    \caption{DALL-E 3 rendering of the leaking coffee maker.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{output/annotated_image.png}
+    \caption{Annotated visualization with the spill region highlighted.}
+\end{figure}
+
+\section{Appendix: Workflow Summary JSON}
+The serialized record below mirrors \texttt{output/workflow\_summary.json} for traceability.
+
+{\small
+\begin{verbatim}
+{
+  "timestamp": "2025-11-15T08:11:11.019757",
+  "workflow_steps": {
+    "1_transcription": "The coffee maker is leaking water from the bottom.",
+    "2_image_prompt": "A realistic photo showing: The coffee maker is leaking water from the bottom.. Focus on showing the product and the specific issue or problem mentioned. Make it clear and detailed.",
+    "3_generated_image_path": "output\\generated_image.png",
+    "4_image_description": "The image depicts a modern coffee maker with a glass carafe, positioned on a kitchen countertop with a tiled backsplash in the background. The coffee maker appears to be actively brewing or has recently brewed coffee. However, there is a visible issue: liquid coffee is overflowing from the carafe and trickling down onto the base of the machine, spreading across the countertop. ...",
+    "5_classification": {
+      "category": "Home & Kitchen",
+      "subcategory": "Appliances",
+      "reasoning": "The complaint involves a coffee maker, which is a kitchen appliance. The issue described pertains to the malfunctioning of the coffee maker, specifically leaking water and overflowing coffee, making 'Appliances' the most appropriate subcategory within 'Home & Kitchen'."
+    }
+  }
+}
+\end{verbatim}}
+
+\section{Next Steps}
+Future work will incorporate the remaining \texttt{Jacket.m4a} and \texttt{Phone.m4a} recordings, expand the report with comparative metrics, and automate PDF generation as part of the rubric validation checklist.
+
+\end{document}

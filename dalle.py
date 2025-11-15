@@ -1,8 +1,9 @@
-# dalle.py
-
 import os
-from openai import AzureOpenAI
+import json
+from urllib.parse import urljoin
+
 import requests
+
 import config
 
 # Function to generate an image representing the customer complaint
@@ -19,23 +20,31 @@ def generate_image(prompt):
     str: The path to the generated image.
     """
     try:
-        # Initialize the Azure OpenAI client for DALL-E
-        client = AzureOpenAI(
-            api_key=config.DALLE_API_KEY,
-            api_version=config.DALLE_API_VERSION,
-            azure_endpoint=config.DALLE_ENDPOINT
+        # Build payload for Azure OpenAI image generation REST call
+        payload = {
+            "prompt": prompt,
+            "n": 1,
+            "size": "1024x1024"
+        }
+
+        headers = {
+            "Content-Type": "application/json",
+            "api-key": config.DALLE_API_KEY
+        }
+
+        base_endpoint = config.DALLE_ENDPOINT.rstrip("/")
+        generate_url = f"{base_endpoint}/openai/deployments/{config.DALLE_DEPLOYMENT}/images/generations?api-version={config.DALLE_API_VERSION}"
+
+        response = requests.post(
+            generate_url,
+            headers=headers,
+            json=payload,
+            timeout=60
         )
-        
-        # Call the DALL-E model to generate an image
-        result = client.images.generate(
-            model=config.DALLE_DEPLOYMENT,
-            prompt=prompt,
-            n=1,  # Number of images to generate
-            size="1024x1024"  # Image size
-        )
-        
-        # Get the image URL from the response
-        image_url = result.data[0].url
+        response.raise_for_status()
+
+        result = response.json()
+        image_url = result["data"][0]["url"]
         
         # Download the generated image
         image_response = requests.get(image_url)

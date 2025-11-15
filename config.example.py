@@ -18,8 +18,8 @@ AZURE_OPENAI_ENDPOINT = "https://your-resource-name.openai.azure.com/"
 AZURE_COGNITIVE_ENDPOINT = "https://your-resource-name.cognitiveservices.azure.com/"
 
 # DALL-E 3 Configuration (may use different endpoint and key)
-DALLE_API_KEY = "your-dalle-api-key-here"
-DALLE_ENDPOINT = "https://your-dalle-resource-name.cognitiveservices.azure.com/"
+DALLE_API_KEY = os.getenv("DALLE_API_KEY", AZURE_OPENAI_API_KEY)
+DALLE_ENDPOINT = os.getenv("DALLE_ENDPOINT", AZURE_OPENAI_ENDPOINT)
 
 # Model Deployment Names
 WHISPER_DEPLOYMENT = "whisper"
